@@ -48,7 +48,7 @@ function App() {
   const fetchISSPosition = useCallback(async () => {
     try {
       setIssError(null);
-      const response = await axios.get('/api/iss/iss-now.json');
+      const response = await axios.get('http://api.open-notify.org/iss-now.json');
       const { latitude, longitude } = response.data.iss_position;
 
       const newPosition = {
@@ -95,7 +95,7 @@ function App() {
    */
   const fetchAstronauts = useCallback(async () => {
     try {
-      const response = await axios.get('/api/iss/astros.json');
+      const response = await axios.get('http://api.open-notify.org/astros.json');
       setAstronauts({
         number: response.data.number,
         people: response.data.people,
