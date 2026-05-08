@@ -60,12 +60,13 @@ function App() {
       setIssPositions((prev) => {
         const updated = [...prev, newPosition].slice(-15); // Keep last 15
 
-        // Calculate speed from last two positions
-        if (updated.length >= 2) {
-          const speed = velocity || calculateSpeed(
-            updated[updated.length - 2],
-            updated[updated.length - 1]
-          );
+        // Use velocity from API if available, otherwise calculate from history
+        const speed = velocity || (updated.length >= 2 ? calculateSpeed(
+          updated[updated.length - 2],
+          updated[updated.length - 1]
+        ) : 0);
+
+        if (speed > 0) {
           setCurrentSpeed(speed);
 
           // Add to speed history (keep last 30)
