@@ -100,6 +100,9 @@ const Chatbot = ({ darkMode, issData, astronauts, articles }) => {
 
 ${dashboardContext}`;
 
+      // Use the model from env or fallback to a default
+      const modelId = import.meta.env.VITE_AI_MODEL || 'meta-llama/Llama-3.1-8B-Instruct:novita';
+
       // Use the new HF router endpoint with OpenAI-compatible chat format
       const response = await fetch(
         'https://router.huggingface.co/v1/chat/completions',
@@ -110,7 +113,7 @@ ${dashboardContext}`;
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'meta-llama/Llama-3.1-8B-Instruct:novita',
+            model: modelId,
             messages: [
               { role: 'system', content: systemPrompt },
               { role: 'user', content: userMessage.content },

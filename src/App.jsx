@@ -43,50 +43,67 @@ function App() {
   }, [darkMode]);
 
   /**
-   * Fetch current ISS position from Open Notify API
+   * Fetch current ISS position with fallback support
    */
   const fetchISSPosition = useCallback(async () => {
-    try {
-      setIssError(null);
-      const response = await axios.get('https://api.wheretheiss.at/v1/satellites/25544');
-      const { latitude, longitude, velocity } = response.data;
+    setIssError(null);
+    let success = false;
+    let positionData = null;
 
+    // Try Primary API (WhereTheISS.at - HTTPS Native)
+    try {
+      const response = await axios.get('https://api.wheretheiss.at/v1/satellites/25544');
+      positionData = {
+        latitude: parseFloat(response.data.latitude),
+        longitude: parseFloat(response.data.longitude),
+        velocity: response.data.velocity,
+      };
+      success = true;
+    } catch (err) {
+      console.warn('Primary ISS API failed, trying fallback...', err);
+    }
+
+    // Try Fallback API (Open Notify - via CORS proxy)
+    if (!success) {
+      try {
+        const response = await axios.get('https://corsproxy.io/?url=http://api.open-notify.org/iss-now.json');
+        positionData = {
+          latitude: parseFloat(response.data.iss_position.latitude),
+          longitude: parseFloat(response.data.iss_position.longitude),
+          velocity: null, // Open Notify doesn't provide velocity
+        };
+        success = true;
+      } catch (err) {
+        console.error('All ISS APIs failed:', err);
+      }
+    }
+
+    if (success && positionData) {
       const newPosition = {
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+        latitude: positionData.latitude,
+        longitude: positionData.longitude,
         timestamp: Date.now(),
       };
 
       setIssPositions((prev) => {
-        const updated = [...prev, newPosition].slice(-15); // Keep last 15
+        const updated = [...prev, newPosition].slice(-15);
 
-        // Use velocity from API if available, otherwise calculate from history
-        const speed = velocity || (updated.length >= 2 ? calculateSpeed(
+        const speed = positionData.velocity || (updated.length >= 2 ? calculateSpeed(
           updated[updated.length - 2],
           updated[updated.length - 1]
         ) : 0);
 
         if (speed > 0) {
           setCurrentSpeed(speed);
-
-          // Add to speed history (keep last 30)
           setSpeedHistory((prevSpeeds) =>
             [...prevSpeeds, { speed, timestamp: newPosition.timestamp }].slice(-30)
           );
         }
-
         return updated;
       });
-
       setIssLoading(false);
-    } catch (err) {
-      console.error('ISS fetch error:', err);
-      // Handle rate limiting gracefully
-      if (err.response?.status === 429) {
-        setIssError('Rate limited — auto-retrying shortly...');
-      } else {
-        setIssError('Failed to fetch ISS position');
-      }
+    } else {
+      setIssError('Failed to fetch ISS data from all sources.');
       setIssLoading(false);
     }
   }, []);
