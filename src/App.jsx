@@ -48,8 +48,8 @@ function App() {
   const fetchISSPosition = useCallback(async () => {
     try {
       setIssError(null);
-      const response = await axios.get('http://api.open-notify.org/iss-now.json');
-      const { latitude, longitude } = response.data.iss_position;
+      const response = await axios.get('https://api.wheretheiss.at/v1/satellites/25544');
+      const { latitude, longitude, velocity } = response.data;
 
       const newPosition = {
         latitude: parseFloat(latitude),
@@ -62,7 +62,7 @@ function App() {
 
         // Calculate speed from last two positions
         if (updated.length >= 2) {
-          const speed = calculateSpeed(
+          const speed = velocity || calculateSpeed(
             updated[updated.length - 2],
             updated[updated.length - 1]
           );
@@ -95,7 +95,7 @@ function App() {
    */
   const fetchAstronauts = useCallback(async () => {
     try {
-      const response = await axios.get('http://api.open-notify.org/astros.json');
+      const response = await axios.get('https://corsproxy.io/?url=http://api.open-notify.org/astros.json');
       setAstronauts({
         number: response.data.number,
         people: response.data.people,
