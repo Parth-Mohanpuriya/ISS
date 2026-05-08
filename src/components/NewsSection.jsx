@@ -47,7 +47,7 @@ const NewsSection = ({ darkMode, articles, setArticles }) => {
     try {
       const apiKey = import.meta.env.VITE_NEWS_API_KEY;
       const searchParam = query ? `q=${encodeURIComponent(query)}` : 'q=technology';
-      const url = `https://gnews.io/api/v4/search?${searchParam}&lang=en&max=10&apikey=${apiKey}`;
+      const url = `/api/news/api/v4/search?${searchParam}&lang=en&max=10&apikey=${apiKey}`;
 
       const response = await axios.get(url);
       const fetchedArticles = response.data.articles || [];

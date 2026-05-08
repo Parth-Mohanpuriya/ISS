@@ -66,7 +66,7 @@ function App() {
     // Try Fallback API (Open Notify - via CORS proxy)
     if (!success) {
       try {
-        const response = await axios.get('https://corsproxy.io/?url=http://api.open-notify.org/iss-now.json');
+        const response = await axios.get('/api/iss/iss-now.json');
         positionData = {
           latitude: parseFloat(response.data.iss_position.latitude),
           longitude: parseFloat(response.data.iss_position.longitude),
@@ -113,7 +113,7 @@ function App() {
    */
   const fetchAstronauts = useCallback(async () => {
     try {
-      const response = await axios.get('https://corsproxy.io/?url=http://api.open-notify.org/astros.json');
+      const response = await axios.get('/api/iss/astros.json');
       setAstronauts({
         number: response.data.number,
         people: response.data.people,
