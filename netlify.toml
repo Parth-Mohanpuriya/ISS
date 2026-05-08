@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Proxy redirects to handle CORS in production
+[[redirects]]
+  from = "/api/iss/*"
+  to = "http://api.open-notify.org/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/news/*"
+  to = "https://gnews.io/:splat"
+  status = 200
+  force = true
